@@ -51,7 +51,8 @@ function mountApp({ device, services }) {
     root: document.getElementById("commandBar"),
     device,
     run: services.run,
-    history: historyRef
+    history: historyRef,
+    sweep: services.calibrationSweep
   });
   mountTelemetryPanel({ root: document.getElementById("plotPanel"), device, selection });
   mountStatusPanel({ root: document.getElementById("statusPanel"), device, config: services.config });
@@ -81,7 +82,13 @@ function mountApp({ device, services }) {
     history: historyRef
   });
   mountPresetsDrawer({ root: presetsRoot, device, presets: services.presets, run: services.run });
-  mountCalibrationDrawer({ root: calibrationRoot, device, cal: services.calibration, run: services.run });
+  mountCalibrationDrawer({
+    root: calibrationRoot,
+    device,
+    cal: services.calibration,
+    run: services.run,
+    sweep: services.calibrationSweep
+  });
   mountToolsDrawer({ root: toolsRoot, drawers });
 
   drawers.register("connect", connectRoot);
@@ -91,7 +98,10 @@ function mountApp({ device, services }) {
   drawers.register("calibration", calibrationRoot, {
     onOpen: () => {
       if (device.isConnected()) void services.calibration.refreshInfo();
-    }
+    },
+    // Closing the drawer (or Escape) has to drop the output: the wizard drives
+    // the bench, and its points are already in the table.
+    onClose: () => services.calibrationSweep.stop()
   });
   drawers.register("tools", toolsRoot);
 

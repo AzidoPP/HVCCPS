@@ -225,3 +225,194 @@
     display: none;
   }
 }
+
+/* ===================== Interactive sweep wizard ===================== */
+
+.cal-wizard,
+.cal-wiz-step {
+  display: grid;
+  gap: 12px;
+}
+
+.cal-wiz-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cal-wiz-section {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.cal-wiz-section legend {
+  padding: 0 4px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.cal-wiz-runhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-wiz-runhead strong {
+  font-size: 0.86rem;
+}
+
+.cal-wiz-chip {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-wiz-chip.is-live {
+  border-color: rgba(21, 128, 61, 0.3);
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.cal-wiz-targetline {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.cal-wiz-live {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 0.78rem;
+}
+
+.cal-wiz-live > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-wiz-sampleline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.cal-wiz-sampleline > span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-wiz-sample.is-busy {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.cal-wiz-warn {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid rgba(161, 98, 7, 0.35);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.76rem;
+}
+
+.cal-wiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-wiz-note {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.cal-wiz-planbox summary,
+.cal-manual > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.cal-wiz-plan {
+  display: grid;
+  gap: 2px;
+  max-height: 220px;
+  margin-top: 8px;
+  overflow: auto;
+  font-size: 0.74rem;
+}
+
+.cal-wiz-plan-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.cal-wiz-plan-index,
+.cal-wiz-plan-aux,
+.cal-wiz-stats {
+  color: var(--muted);
+}
+
+.cal-wiz-stats {
+  font-size: 0.74rem;
+}
+
+.cal-wiz-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.cal-wiz-summary h3 {
+  font-size: 0.72rem;
+}
+
+.cal-wiz-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.cal-wiz-summary th,
+.cal-wiz-summary td {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cal-wiz-summary th {
+  background: #f3f6f8;
+}
+
+.cal-manual {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.cal-manual .form-group,
+.cal-manual .warn-block {
+  margin-top: 10px;
+}
+
+@media (max-width: 760px) {
+  .cal-wiz-grid,
+  .cal-wiz-live {
+    grid-template-columns: 1fr;
+  }
+}

@@ -26,7 +26,7 @@ const { outputPowerMw } = require("device/metrics");
 const { START_MODE } = require("device/run-service");
 const { confirmAction } = require("ui/components/confirm");
 
-function mountCommandBar({ root, device, run, history }) {
+function mountCommandBar({ root, device, run, history, sweep }) {
   const lamp = qs(root, '[data-el="lamp"]');
   const stateLabel = qs(root, '[data-el="stateLabel"]');
   const stateMeta = qs(root, '[data-el="stateMeta"]');
@@ -56,6 +56,12 @@ function mountCommandBar({ root, device, run, history }) {
   }
 
   async function triggerPrimary() {
+    // A calibration sweep drives the setpoints itself; letting the command bar
+    // push its staged targets on top would silently move the point being
+    // measured. STOP below stays live -- an emergency stop must never be
+    // blocked by a wizard.
+    if (sweep.isActive()) return;
+
     if (device.isOutputLive()) {
       await run.updateTargets();
       requestRender();
@@ -135,10 +141,11 @@ function mountCommandBar({ root, device, run, history }) {
     }
 
     // ---- actions ----
+    const sweeping = sweep.isActive();
     const targetsDiffer = live && run.targetsDiffer();
-    setText(primary, live ? t("cmd.update") : t("cmd.start"));
-    setClass(primary, "is-armed", targetsDiffer);
-    setDisabled(primary, live ? !connected || latest.fixedDutyActive || !targetsDiffer : !connected);
+    setText(primary, sweeping ? t("cmd.sweepBusy") : live ? t("cmd.update") : t("cmd.start"));
+    setClass(primary, "is-armed", targetsDiffer && !sweeping);
+    setDisabled(primary, sweeping || (live ? !connected || latest.fixedDutyActive || !targetsDiffer : !connected));
     setDisabled(stop, !connected);
   });
 }

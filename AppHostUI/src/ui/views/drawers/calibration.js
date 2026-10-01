@@ -1,4 +1,10 @@
-// Output calibration drawer: point table, compiled preview, flash upload.
+// Output calibration drawer: the interactive sweep wizard, the manual point
+// table, the compiled preview and the flash upload.
+//
+// The wizard is a separate view (drawers/calibration-wizard.js) mounted into
+// this drawer's [data-el="wizard"] slot. Both write into the same point table
+// (device/calibration-service.js), so everything below the wizard -- compile,
+// preview, validation, write to flash -- is shared and unchanged.
 
 HV.define("ui/views/drawers/calibration", function (require, exports) {
 "use strict";
@@ -8,6 +14,7 @@ const { formatCurrentMa, formatSig, formatVoltageMv } = require("core/format");
 const { registerView } = require("core/scheduler");
 const { onLanguageChange, t } = require("i18n/index");
 const { CAL_IMAGE_BYTES, CAL_I_POINTS, CAL_I_STEP_MA, CAL_V_POINTS, CAL_V_STEP_MV, calEvalCurrent, calEvalVoltage } = require("protocol/index");
+const { mountCalibrationWizard } = require("ui/views/drawers/calibration-wizard");
 const { renderValidation } = require("ui/components/validation");
 
 function signed(value, unit) {
@@ -20,7 +27,7 @@ function deltaClass(value, deadband) {
   return value > 0 ? "cal-delta-pos" : "cal-delta-neg";
 }
 
-function mountCalibrationDrawer({ root, device, cal, run }) {
+function mountCalibrationDrawer({ root, device, cal, run, sweep }) {
   const state = qs(root, '[data-el="state"]');
   const lockNote = qs(root, '[data-el="lockNote"]');
   const statusTable = qs(root, '[data-el="statusTable"]');
@@ -44,6 +51,9 @@ function mountCalibrationDrawer({ root, device, cal, run }) {
   let rowSignature = "";
   let previewSignature = "";
   const rowInputs = new Map();
+
+  const wizardRoot = qs(root, '[data-el="wizard"]');
+  mountCalibrationWizard({ root: wizardRoot, device, cal, run, sweep });
 
   function numberCell(kind, id, key, placeholder, extraClass = "") {
     const input = h(`input${extraClass}`, {
@@ -227,13 +237,17 @@ function mountCalibrationDrawer({ root, device, cal, run }) {
         ? t("cal.stateUploading")
         : !connected
           ? t("cal.stateOffline")
-          : live
-            ? t("cal.stateLive")
-            : info && info.valid
-              ? t("cal.stateValid")
-              : t("cal.stateEmpty")
+          : sweep.isActive()
+            ? t("cal.wiz.stateRunning")
+            : live
+              ? t("cal.stateLive")
+              : info && info.valid
+                ? t("cal.stateValid")
+                : t("cal.stateEmpty")
     );
-    setHidden(lockNote, !live);
+    // The wizard deliberately holds the output live, so the "locked" note only
+    // applies when something *else* is driving it.
+    setHidden(lockNote, !live || sweep.isActive());
 
     setText(statusTable, info ? (info.valid ? `${info.vPoints} × ${info.iPoints}` : t("cal.noTable")) : "--");
     setText(statusCrc, info && info.valid ? `0x${info.crc.toString(16).padStart(8, "0")}` : "--");
@@ -252,10 +266,13 @@ function mountCalibrationDrawer({ root, device, cal, run }) {
 
     // Entering points and compiling the table are host-side work: they stay
     // available offline so a bench sheet can be prepared before connecting.
-    // Only touching flash (write / enable) needs a live link.
-    const editLocked = live || cal.model.uploadBusy;
-    setDisabled(enableToggle, !connected || live || busy);
-    setDisabled(writeButton, !connected || live || busy);
+    // Only touching flash (write / enable) needs a live link. A running sweep
+    // owns the point table even in the moments its output is down (the point's
+    // run timer), so it locks the manual editor for its whole run.
+    const sweeping = sweep.isActive();
+    const editLocked = live || sweeping || cal.model.uploadBusy;
+    setDisabled(enableToggle, !connected || live || busy || sweeping);
+    setDisabled(writeButton, !connected || live || busy || sweeping);
     setDisabled(compileButton, editLocked);
     setDisabled(addVoltage, editLocked);
     setDisabled(addCurrent, editLocked);

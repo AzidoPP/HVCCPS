@@ -436,15 +436,12 @@
   </header>
   <div class="drawer-body">
     <p class="drawer-note" data-i18n="cal.intro">
-      Enter the uncalibrated RAW value reported by the device and the value an external meter measured. The host
-      compiles a residual table (exact at your points, linear between them, smoothly decaying to zero outside) and
-      streams it to a dedicated flash region. Corrections are clamped to ±50 V / ±50 mA in firmware. Writing and
-      enabling calibration touch flash, so the output must be off.
+      The wizard drives one setpoint at a time, waits for the RAW reading to settle, then asks for the meter value.
+      Measured points land in the same table the manual editor below uses. The host compiles a residual table
+      (exact at your points, linear between them, smoothly decaying to zero outside) and streams it to a dedicated
+      flash region. Corrections are clamped to ±50 V / ±50 mA in firmware. Writing and enabling calibration touch
+      flash, so the output must be off.
     </p>
-    <div class="warn-block" data-i18n="cal.rawNote">
-      Collect points with Apply calibration OFF. Use RAW VSEC / RAW ISEC as the input columns, then enter the
-      external meter readings in the measured columns.
-    </div>
     <div class="lock-note" data-el="lockNote" hidden data-i18n="cal.locked">
       Calibration is locked while the output is live. Stop the output to edit it.
     </div>
@@ -460,34 +457,44 @@
       <span data-i18n="cal.enable">Apply calibration to the control loop (saved to config flash)</span>
     </label>
 
-    <fieldset class="form-group">
-      <legend data-i18n="cal.voltagePoints">Voltage points</legend>
-      <p class="hint" data-i18n="cal.voltageHint">RAW VSEC, meter V, and optionally meter current (mA) for load-dependent correction.</p>
-      <div class="cal-table">
-        <div class="cal-table-head">
-          <span data-i18n="cal.rawVsec">RAW VSEC (V)</span>
-          <span data-i18n="cal.meterV">Meter V</span>
-          <span data-i18n="cal.meterIOpt">Meter I (mA, opt)</span>
-          <span></span>
-        </div>
-        <div class="cal-rows" data-el="voltageRows"></div>
-      </div>
-      <button class="small-button" type="button" data-el="addVoltage" data-i18n="cal.addVoltage">+ Add voltage point</button>
-    </fieldset>
+    <section class="cal-wizard" data-el="wizard"></section>
 
-    <fieldset class="form-group">
-      <legend data-i18n="cal.currentPoints">Current points</legend>
-      <p class="hint" data-i18n="cal.currentHint">RAW ISEC (mA) and meter I (mA), collected while calibration is disabled.</p>
-      <div class="cal-table">
-        <div class="cal-table-head cal-table-head-2">
-          <span data-i18n="cal.rawIsec">RAW ISEC (mA)</span>
-          <span data-i18n="cal.meterI">Meter I (mA)</span>
-          <span></span>
-        </div>
-        <div class="cal-rows" data-el="currentRows"></div>
+    <details class="cal-manual">
+      <summary data-i18n="cal.manual">Manual point table</summary>
+      <div class="warn-block" data-i18n="cal.rawNote">
+        Collect points with Apply calibration OFF. Use RAW VSEC / RAW ISEC as the input columns, then enter the
+        external meter readings in the measured columns.
       </div>
-      <button class="small-button" type="button" data-el="addCurrent" data-i18n="cal.addCurrent">+ Add current point</button>
-    </fieldset>
+
+      <fieldset class="form-group">
+        <legend data-i18n="cal.voltagePoints">Voltage points</legend>
+        <p class="hint" data-i18n="cal.voltageHint">RAW VSEC, meter V, and optionally meter current (mA) for load-dependent correction.</p>
+        <div class="cal-table">
+          <div class="cal-table-head">
+            <span data-i18n="cal.rawVsec">RAW VSEC (V)</span>
+            <span data-i18n="cal.meterV">Meter V</span>
+            <span data-i18n="cal.meterIOpt">Meter I (mA, opt)</span>
+            <span></span>
+          </div>
+          <div class="cal-rows" data-el="voltageRows"></div>
+        </div>
+        <button class="small-button" type="button" data-el="addVoltage" data-i18n="cal.addVoltage">+ Add voltage point</button>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <legend data-i18n="cal.currentPoints">Current points</legend>
+        <p class="hint" data-i18n="cal.currentHint">RAW ISEC (mA) and meter I (mA), collected while calibration is disabled.</p>
+        <div class="cal-table">
+          <div class="cal-table-head cal-table-head-2">
+            <span data-i18n="cal.rawIsec">RAW ISEC (mA)</span>
+            <span data-i18n="cal.meterI">Meter I (mA)</span>
+            <span></span>
+          </div>
+          <div class="cal-rows" data-el="currentRows"></div>
+        </div>
+        <button class="small-button" type="button" data-el="addCurrent" data-i18n="cal.addCurrent">+ Add current point</button>
+      </fieldset>
+    </details>
 
     <details class="cal-advanced">
       <summary data-i18n="cal.advanced">Advanced: decay radius</summary>
@@ -619,6 +626,7 @@
 
   <!-- device -->
   <script src="src/device/calibration-service.js"></script>
+  <script src="src/device/calibration-sweep.js"></script>
   <script src="src/device/config-service.js"></script>
   <script src="src/device/cycle-signals.js"></script>
   <script src="src/device/device-service.js"></script>
@@ -639,6 +647,7 @@
   <script src="src/ui/registry.js"></script>
   <script src="src/ui/views/command-bar.js"></script>
   <script src="src/ui/views/cycle-overlay.js"></script>
+  <script src="src/ui/views/drawers/calibration-wizard.js"></script>
   <script src="src/ui/views/drawers/calibration.js"></script>
   <script src="src/ui/views/drawers/configure.js"></script>
   <script src="src/ui/views/drawers/connect.js"></script>

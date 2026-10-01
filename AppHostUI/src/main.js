@@ -18,6 +18,7 @@ const { renderNow } = require("core/scheduler");
 const { apply: applyI18n, getLanguage, initLanguage, onLanguageChange, setLanguage } = require("i18n/index");
 const { createDeviceService } = require("device/device-service");
 const { createCalibrationService } = require("device/calibration-service");
+const { createCalibrationSweepService } = require("device/calibration-sweep");
 const { createConfigService } = require("device/config-service");
 const { createPresetsService } = require("device/presets-service");
 const { createRunService } = require("device/run-service");
@@ -46,7 +47,8 @@ function boot() {
   const run = createRunService(device);
   const presets = createPresetsService(device, config);
   const calibration = createCalibrationService(device, config);
-  const services = { config, run, presets, calibration };
+  const calibrationSweep = createCalibrationSweepService(device, calibration);
+  const services = { config, run, presets, calibration, calibrationSweep };
 
   const plugins = createPluginHost({ device, services, metrics: TELEMETRY_METRICS });
   plugins.registerAll(BUILT_IN_PLUGINS);

@@ -38,12 +38,24 @@ function createCalibrationService(device, config) {
   }
 
   function addVoltagePoint(point = {}) {
-    model.voltagePoints.push({ id: nextId++, setV: point.setV ?? "", measuredV: point.measuredV ?? "", measuredI: point.measuredI ?? "" });
+    const row = { id: nextId++, setV: point.setV ?? "", measuredV: point.measuredV ?? "", measuredI: point.measuredI ?? "" };
+    model.voltagePoints.push(row);
     invalidate();
+    return row;
   }
 
   function addCurrentPoint(point = {}) {
-    model.currentPoints.push({ id: nextId++, setI: point.setI ?? "", measuredI: point.measuredI ?? "" });
+    const row = { id: nextId++, setI: point.setI ?? "", measuredI: point.measuredI ?? "" };
+    model.currentPoints.push(row);
+    invalidate();
+    return row;
+  }
+
+  /** Drop every point. The sweep wizard's "clear before start" option; the
+   *  manual table shows the same lists, so both views stay in step. */
+  function clearPoints() {
+    model.voltagePoints.length = 0;
+    model.currentPoints.length = 0;
     invalidate();
   }
 
@@ -240,6 +252,7 @@ function createCalibrationService(device, config) {
     model,
     addVoltagePoint,
     addCurrentPoint,
+    clearPoints,
     patchPoint,
     removePoint,
     setRadius,
